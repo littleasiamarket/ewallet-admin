@@ -39,8 +39,9 @@ class DLUserAclAccess extends \System\Datalayers\Main{
         }
         $url = '/useraclacc/search' ;
         $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
 
-        return $result['data'] ;
+        return $result ;
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

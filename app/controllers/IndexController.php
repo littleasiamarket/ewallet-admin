@@ -85,9 +85,8 @@ class IndexController extends \Backoffice\Controllers\BaseController
                     $ipallowed = $userGeneral->checkIP($user->id , $ip);
                     if(!$ipallowed){
                         $this->errorFlash($view->translate['ip_not_allowed']);
-                        return $this->response->redirect("/login");
+//                        return $this->response->redirect("/login");
                     }
-
 
                     // if Type == 10, subaccount, $user fill with parent, session sidebar and acl filled with its own acl
                     if($user->tp == 10) {

@@ -44,8 +44,7 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
         $page = $paginator->getPaginate();
 
         $pagination = ceil($user->count()/$limit);
-//        $view->page = $page->items;
-        $view->page = $page->items['user'];
+        $view->page = $page->items;
         $view->pagination = $pagination;
         $view->pages = $pages;
         $view->limit = $limit;

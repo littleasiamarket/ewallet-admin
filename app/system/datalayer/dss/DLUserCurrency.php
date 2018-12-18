@@ -34,8 +34,9 @@ class DLUserCurrency extends \System\Datalayers\Main {
         );
         $url = '/usercurr/find';
         $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
 
-        return $result->uscu ;
+        return $result ;
     }
 
 
@@ -46,19 +47,22 @@ class DLUserCurrency extends \System\Datalayers\Main {
         );
         $url = '/usercurr/find';
         $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
 
-        return $result->uscu ;
+        return $result ;
     }
 
     public function getByUser($user){
         $postData = array(
             'status' => 1 ,
+            'currency_status' => 1 ,
             'user_id' => $user ,
         );
         $url = '/usercurr/find';
         $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
 
-        return $result->uscu ;
+        return $result ;
     }
 
     public function setDefault( $id , $value ){

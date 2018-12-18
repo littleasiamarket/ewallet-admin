@@ -43,6 +43,7 @@ class DLUser extends \System\Datalayers\Main
         );
         $url = '/user/find';
         $result = $this->curlAppsJson( $url , $postData );
+        $result = $this->curlFindData($result);
 
         return $result;
     }

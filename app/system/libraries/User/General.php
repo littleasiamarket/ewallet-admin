@@ -334,7 +334,7 @@ class General
     }
 
     public function checkIP($id , $ip){
-        $ipallowed = true ;
+        $ipallowed = false ;
         $DLWhitelistIp = new DLUserWhitelistIp() ;
         $whitelistIP = $DLWhitelistIp->getByUser($id) ;
         foreach ( $whitelistIP as $key => $value ){

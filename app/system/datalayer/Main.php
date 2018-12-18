@@ -51,4 +51,13 @@ class Main
         return $data ;
     }
 
+    public function curlFindData($data){
+        $result = false ;
+        foreach ($data as $key => $value ){
+            $result = $data[$key];
+        }
+
+        return $result ;
+    }
+
 }

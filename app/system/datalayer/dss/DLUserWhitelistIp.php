@@ -14,8 +14,9 @@ class DLUserWhitelistIp extends Main{
         );
         $url = '/userwlip/find';
         $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
 
-        return $result->data ;
+        return $result ;
     }
     public function getByIp($ip){
         $postData = array(
@@ -24,8 +25,9 @@ class DLUserWhitelistIp extends Main{
         );
         $url = '/userwlip/find';
         $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
 
-        return $result->data ;
+        return $result ;
     }
 
     public function create($user,$ip){
@@ -77,7 +79,6 @@ class DLUserWhitelistIp extends Main{
 
         $url = '/userwlip/find';
         $userWhitelistIpRecords = $this->curlAppsJson($url,$postData);
-
         $userWhitelistIp = false;
         foreach ($userWhitelistIpRecords['data'] as $userWhitelistIpRecord){
             $userWhitelistIp = $userWhitelistIpRecord;
