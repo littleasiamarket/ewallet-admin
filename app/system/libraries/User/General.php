@@ -37,12 +37,13 @@ class General
     public function setSubaccountDefault($acl , $id){
         foreach ($acl as $aclrow){
             $status = 0;
-            if($aclrow->getModule() == 'user' ) $status = 1;
-            if($aclrow->getModule() != 'subaccount'){
+            if($aclrow->module == 'user' ) $status = 1;
+            if($aclrow->module != 'subaccount'){
                 $acl = new DLUserAclAccess();
                 $acl->setAclAccessWithStatus($id , $aclrow , $status);
             }
         }
+        return true ;
     }
 
     public function editSubaccountACL($aclList , $parent , $child){
@@ -144,46 +145,46 @@ class General
     public function filterACLlistSubaccount($aclObject){
         $aclList = array();
         foreach ($aclObject as $key){
-            if(!isset($aclList[$key->getModule()])) {
-                $aclList[$key->getModule()] = array();
-                $aclList[$key->getModule()]["child"] = array();
+            if(!isset($aclList[$key->mod])) {
+                $aclList[$key->mod] = array();
+                $aclList[$key->mod]["child"] = array();
             }
             //get module level list
-            if(is_null($key->getController()) && is_null($key->getAction())) {
-                $aclList[$key->getModule()]["name"] = $key->getSidebarName();
-                $aclList[$key->getModule()]["id"] = $key->getId();
+            if(is_null( $key->con ) && is_null( $key->act )) {
+                $aclList[$key->mod]["name"] = $key->sbn ;
+                $aclList[$key->mod]["id"] = $key->id ;
             }
             //get controller level list
-            if(!is_null($key->getController()) && $key->getAction() == null ) {
-                if(!isset($aclList[$key->getModule()]["child"][$key->getController()])) {
+            if(!is_null($key->con) && $key->act == null ) {
+                if(!isset($aclList[$key->mod]["child"][$key->con])) {
                     $controllerAcl = array();
                     $controllerAcl["child"] = array();
                 }else{
-                    $controllerAcl = $aclList[$key->getModule()]["child"][$key->getController()];
+                    $controllerAcl = $aclList[$key->mod]["child"][$key->con];
                 }
 
-                if($key->getAction() == null ) {
-                    $controllerAcl["name"] = $key->getSidebarName();
-                    $controllerAcl["id"] = $key->getId();
+                if($key->act == null ) {
+                    $controllerAcl["name"] = $key->sbn;
+                    $controllerAcl["id"] = $key->id;
                 }
 
-                $aclList[$key->getModule()]["child"][$key->getController()] = $controllerAcl;
+                $aclList[$key->mod]["child"][$key->con] = $controllerAcl;
             }
             //get child of the controller
-            if(!is_null($key->getController()) && !is_null($key->getAction()) ) {
-                if(!isset($aclList[$key->getModule()]["child"][$key->getController()])) {
+            if(!is_null($key->con) && !is_null($key->act) ) {
+                if(!isset($aclList[$key->mod]["child"][$key->con])) {
                     $controllerAcl = array();
                     $controllerAcl["child"] = array();
                 }else{
-                    $controllerAcl = $aclList[$key->getModule()]["child"][$key->getController()];
+                    $controllerAcl = $aclList[$key->mod]["child"][$key->con];
                 }
 
                 $actionAcl = array();
-                $actionAcl["name"] = $key->getSidebarName();
-                $actionAcl["id"] = $key->getId();
-                $controllerAcl["child"][$key->getAction()] = $actionAcl;
+                $actionAcl["name"] = $key->sbn;
+                $actionAcl["id"] = $key->id;
+                $controllerAcl["child"][$key->act] = $actionAcl;
 
-                $aclList[$key->getModule()]["child"][$key->getController()] = $controllerAcl;
+                $aclList[$key->mod]["child"][$key->con] = $controllerAcl;
             }
         }
         return $aclList;
@@ -211,14 +212,21 @@ class General
         return $aclList;
     }
 
+    // MYSQL FORMAT
+//    public function filterACLsubaccountParentId($aclObject){
+//        $aclList = array();
+//        foreach ($aclObject as $key){
+//            $aclList[$key->parent] = $key->status ;
+//        }
+//        return $aclList;
+//    }
 
+    // DSS FORMAT
     public function filterACLsubaccountParentId($aclObject){
-
         $aclList = array();
         foreach ($aclObject as $key){
             $aclList[$key->parent] = $key->status ;
         }
-
         return $aclList;
     }
 
@@ -361,6 +369,12 @@ class General
         return $ipallowed ;
     }
 
+    public function generateSession(){
+        $string = "greedisgood" ;
+        $session = base64_encode(mt_rand().time().$string.mt_rand().time() ) ;
+
+        return $session ;
+    }
 
 
 }

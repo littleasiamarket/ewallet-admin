@@ -6,7 +6,7 @@
             <div class="col-xs-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title row">
-                        <h5>{{childuser.username}} </h5>
+                        <h5>{{childuser.sn}} </h5>
                     </div>
                     <div class="ibox-content row">
                         <div class="tabs-container">
@@ -21,7 +21,7 @@
                                             <div class="form-group">
                                                 <label class="col-xs-3 control-label"> {{ translate['username']|upper }} </label>
                                                 <label class="col-xs-9">
-                                                    <input type="text" placeholder="Type" class="form-control uppercase" class="form-control" value="{{childuser.username}}" readonly>
+                                                    <input type="text" placeholder="{{ translate['username']|upper }}" class="form-control uppercase" class="form-control" value="{{childuser.sn}}" readonly>
                                                 </label>
                                             </div>
                                             <div class="form-group">
@@ -65,7 +65,7 @@
                                                 <label class="col-xs-9">
                                                 <select class="status form-control">
                                                     {% for key, value in status %}
-                                                        <option value="{{childuser.id~"|"~value}}" {% if childuser.status == value %}selected{% endif %}>{{ key|upper }}</option>
+                                                        <option value="{{childuser.id~"|"~value}}" {% if childuser.ust == value %}selected{% endif %}>{{ key|upper }}</option>
                                                     {% endfor %}
                                                 </select>
                                                 </label>

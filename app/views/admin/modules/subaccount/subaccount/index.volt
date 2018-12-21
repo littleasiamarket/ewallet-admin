@@ -38,7 +38,7 @@
                                 <li class="col-sm-3 col-xs-3 list-group-item">
                                     <select class="status">
                                         {% for key, value in status %}
-                                            <option value="{{mainData.id~"|"~value}}" {% if mainData.status == value %}selected{% endif %}>{{ key|upper }}</option>
+                                            <option value="{{mainData.id~"|"~value}}" {% if mainData.ust == value %}selected{% endif %}>{{ key|upper }}</option>
                                         {% endfor %}
                                     </select>
                                 </li>

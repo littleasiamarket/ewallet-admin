@@ -7,6 +7,50 @@ use System\Model\User;
 
 class DLUser extends \System\Datalayers\Main
 {
+    public function createSubaccount($data)
+    {
+        $url = '/user/insert';
+        $postData = array(
+            'sn' => $data['username'] ,
+            'ps' => $data['password'] ,
+            'nn' => $data['username'] ,
+            'idp' => $data['parent'] ,
+            'tz' => $data['timezone'] ,
+            'tp' => 10 ,
+            'cd' => $data['username'] ,
+            'rp' => 1 ,
+            'rn' => 1 ,
+            'ust' => 1 ,
+            'pst' => 1
+        );
+        $user = $this->curlAppsJson($url, $postData);
+
+        return $user;
+    }
+
+
+    public function checkNickname($newNickname)
+    {
+        $url = '/user/find';
+        $postData = array(
+            'nickname' => $newNickname
+        );
+        $nickname = $this->curlAppsJson( $url , $postData);
+        $nickname = $this->curlFindData($nickname);
+
+        $postData = array(
+            'username' => $newNickname
+        );
+        $username = $this->curlAppsJson( $url , $postData);
+        $username = $this->curlFindData($username);
+
+        $check = false;
+        if ( count($nickname) > 0 || count($username) > 0 ) {
+            $check = true;
+        }
+        return $check;
+    }
+
     public function getFirstByNickname($user)
     {
         $postData = array(
@@ -40,6 +84,7 @@ class DLUser extends \System\Datalayers\Main
         $postData = array(
             'type' => 10 ,
             'parent' => $user ,
+            'status' => 1
         );
         $url = '/user/find';
         $result = $this->curlAppsJson( $url , $postData );
@@ -64,6 +109,21 @@ class DLUser extends \System\Datalayers\Main
 
         return false;
     }
+
+    //TODO: CHANGE TO setUserStatus
+    public function setStatus($user, $status)
+    {
+        $postData = array(
+            'st' => $status
+        );
+        $url = '/user/'.$user.'/update';
+        $result = $this->curlAppsJson( $url , $postData);
+
+        if ($result->ec == 0) return true ;
+        return false ;
+
+    }
+
 
     // DSS
     public function findByParent($parent)

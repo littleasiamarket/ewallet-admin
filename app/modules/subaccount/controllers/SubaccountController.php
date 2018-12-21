@@ -3,7 +3,8 @@ namespace Backoffice\Subaccount\Controllers;
 
 use System\Datalayer\DLUser;
 use System\Datalayer\DLUserAclAccess;
-use System\Datalayer\DLUserAclResource;
+
+
 use System\Datalayer\DLUserWhitelistIp;
 use System\Library\User\General ;
 use System\Library\Security\Validation ;
@@ -52,6 +53,10 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
         $view->main = $user ;
         $view->status = $status;
 
+//        echo "<pre>";
+//        var_dump($aclChild);
+//        die;
+
         \Phalcon\Tag::setTitle("Manage SubAccount - ".$this->_website->title);
     }
 
@@ -86,8 +91,9 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
                     }
                 }
             } else {
+
                 $DLuser = new DLUser();
-                $data['username'] = $this->_user->getUsername()."SUB".$data['username'];
+                $data['username'] =$this->_user->sn."SUB".$data['username'];
                 $checknick = $DLuser->checkNickname($data['username']);
 
                 if($checknick){
@@ -95,42 +101,29 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
                 } else {
                     $securityLibrary = new SecurityUser();
                     $data['password'] = $securityLibrary->enc_str($data['password']);
-                    $data['parent'] = $this->_user->getId();
-                    $data['timezone'] = $this->_user->getTimezone();
+                    $data['password'] = base64_encode($data['password']);
+                    $data['parent'] = $this->_user->id ;
+                    $data['timezone'] = $this->_user->tz ;
 
                     try {
-                        $this->db->begin();
-
-                        $user = $DLuser->createSubaccount($data);
+                        $DLuser->createSubaccount($data);
+                        $users = $DLuser->findFirstByUsername($data['username']);
+                        $DLUserAclAccess = new DLUserAclAccess();
+                        $aclObject = $DLUserAclAccess->getByIdParentSubaccount( $users->idp  , true );
                         $generalLibrary = new General();
-//                        $aclObject = $generalLibrary->getACL($this->_user->getId() , $this->_user->getParent() );
-                        $aclObject = $generalLibrary->getSubaccountACLParent($this->_user->getId());
-
-                        $access = $generalLibrary->setSubaccountDefault($aclObject , $user->getId());
+                        $access = $generalLibrary->setSubaccountDefault($aclObject , $users->id );
                         //TODO :: dont insert subaccount, and module user default = 1
 
                         $whitelist = new DLUserWhitelistIp();
-                        $data['ip'] = '*';
-                        $whitelist->create($user->getId() , $data['ip']);
+                        $ip = '*';
+                        $whitelist->create( $users->id , $ip);
 
-                        $this->db->commit();
                         $this->flash->success("subaccount_add_successful");
-                        $this->response->redirect($this->_module."/".$this->_controller."/detail/".$user->getId()."#tab-acl")->send();
+                        $this->response->redirect($this->_module."/".$this->_controller."/detail/".$users->id."#tab-acl")->send();
                     } catch (\Exception $e) {
-                        $this->db->rollback();
+//                        //TODO :: remember_to add error log for this function below
                         $this->flash->error($e->getMessage());
                     }
-
-//                    if($user){
-//
-//                        $this->successFlash($this->_translate['new_subaccount_success']);
-//                        return $this->response->redirect("/");
-//                    } else {
-//                        //TODO :: remember_to add error log for this function below
-////                        \error_log('USER_UPDATE_PASSWD', 'username', $this->_user->getUsername(), 'oldpass', '' . $data['password'] . '', '', '');
-//                        $this->errorFlash($this->_translate['new_subaccount_failed']);
-//                    }
-
 
                 }
 
@@ -164,10 +157,6 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
 //
                     $aclChild = $generalLibrary->getACL( $user->getId() , true );
                     $DLAccess->setACLSubaccountFalse($aclChild);
-
-//                    echo "<pre>";
-//                    var_dump($data);
-//                    die;
 
                     if(!is_null($data['acl']))
                     $result = $generalLibrary->editSubaccountACL($data['acl'] , $user->getParent() , $user->getId()) ;
@@ -210,14 +199,23 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
 
         $DLUser = new DLUser();
         $user = $DLUser->getById($childId);
-        if($user->getParent() == $this->_user->getId()){
-            $generalLibrary = new General();
-//                $aclParent = $generalLibrary->getACL($this->_user->getId() , $this->_user->getParent() );
-            $aclParent = $generalLibrary->getSubaccountACLParent($this->_user->getId() , true );
-            $aclParent = $generalLibrary->filterACLlistSubaccount($aclParent);
 
-            $aclChild = $generalLibrary->getACL( $user->getId() );
-            $aclChild = $generalLibrary->filterACLsubaccountParentId($aclChild) ;
+        if($user->idp == $this->_user->id ){
+
+            $DLUserAclAccess = new DLUserAclAccess();
+            $generalLibrary = new General();
+            $aclParent = $DLUserAclAccess->getByIdParentSubaccount( $this->_user->id , true );
+            $aclParent = $generalLibrary->filterACLlistSubaccount( $aclParent );
+
+            $aclChild = $generalLibrary->getACL( $user->id );
+            $aclChild = $generalLibrary->filterACLsubaccountParentId( $aclChild ) ;
+
+//            echo "asd <pre>";
+//            var_dump($this->_user->id);
+//            var_dump($aclParent);
+//            var_dump($user->id);
+//            var_dump($aclChild);
+//            die;
 
             $view->childuser = $user ;
             $view->aclParent = $aclParent ;
@@ -239,6 +237,7 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
         $previousPage = new GlobalVariable();
         $currentId = $this->dispatcher->getParam("id");
 
+
         $currentId = explode("|",$currentId);
         $id = $currentId[0];
         $status = $currentId[1];
@@ -251,15 +250,11 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
         }
 
         try {
-            $this->db->begin();
+            $DLUser->setStatus($user->id , $status);
 
-            $DLUser->setStatus($user , $status);
-
-            $this->db->commit();
             $this->flash->success("status_changed");
             $this->response->redirect($previousPage->previousPage());
         } catch (\Exception $e) {
-            $this->db->rollback();
             $this->flash->error($e->getMessage());
         }
  

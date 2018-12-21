@@ -26,15 +26,35 @@ class DLUserAclAccess extends \System\Datalayers\Main{
     }
     // END DSS
 
-    public function getById($user , $subaccount = false ){
+
+    public function setAclAccessWithStatus( $id, $data , $status){
+        $url = '/useraclacc/insert';
+
+        $postData = array(
+            'idus' => $id ,
+            'idpa' => $data['id'] ,
+            'mod' => $data['mod'] ,
+            'con' => $data['con'] ,
+            'act' => $data['act'] ,
+            'sb' => $data['sb'] ,
+            'sbn' => $data['sbn'] ,
+            'sbc' => $data['sbc'] ,
+            'sbo' => $data['sbo'] ,
+            'st' => $status
+        );
+        $aclAccess = $this->curlAppsJson($url, $postData);
+        return $aclAccess;
+    }
+
+    public function getById( $id , $subaccount = false ){
         if($subaccount){
-            $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $user );
-            $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
+            $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $id );
+//            $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
             $postData['conditions'][] = $this->curlConditions("!=" , "module" , "user" );
             $postData['orders'][] = $this->curlOrders("asc" , "sidebar_order" );
         } else {
-            $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $user );
-            $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
+            $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $id );
+//            $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
             $postData['orders'][] = $this->curlOrders("asc" , "sidebar_order" );
         }
         $url = '/useraclacc/search' ;
@@ -44,25 +64,29 @@ class DLUserAclAccess extends \System\Datalayers\Main{
         return $result ;
     }
 
+    public function getByIdParentSubaccount( $id , $subaccount = false){
+        $url = '/useraclacc/search' ;
+
+        if($subaccount){
+            $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $id );
+            $postData['conditions'][] = $this->curlConditions("!=" , "module" , "subaccount" );
+            $postData['conditions'][] = $this->curlConditions("!=" , "module" , "user" );
+            $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
+            $postData['orders'][] = $this->curlOrders("asc" , "sidebar_order" );
+        } else {
+            $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $id );
+            $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
+            $postData['orders'][] = $this->curlOrders("asc" , "sidebar_order" );
+        }
+        $result = $this->curlAppsJson( $url , $postData);
+        $result = $this->curlFindData($result);
+
+        return $result ;
+    }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public function getByIdParentSubaccount($user, $subaccount = false){
-        if($subaccount){
-            $acl = UserAclAccess::query()
-                ->where("user = :user: and module != 'subaccount'  and module != 'user' and status = 1 ")
-                ->bind(array( "user" => $user ))
-                ->orderBy("sidebar_order")
-                ->execute();
-        }else{
-            $acl = UserAclAccess::query()
-                ->where("user = :user: and status = 1 ")
-                ->bind(array( "user" => $user ))
-                ->orderBy("sidebar_order")
-                ->execute();
-        }
-
-        return $acl;
-    }
 
     public function checkParent($id , $user){
         $acl = UserAclAccess::query()
@@ -219,23 +243,5 @@ class DLUserAclAccess extends \System\Datalayers\Main{
 //        return $aclAccess;
 //    }
 
-    public function setAclAccessWithStatus($id, $data , $status){
-        $aclAccess = new UserAclAccess();
-        $aclAccess->setUser($id);
-        $aclAccess->setParent($data->getId());
-        $aclAccess->setModule($data->getModule());
-        $aclAccess->setController($data->getController());
-        $aclAccess->setAction($data->getAction());
-        $aclAccess->setSidebar($data->getSidebar());
-        $aclAccess->setSidebarName($data->getSidebarName());
-        $aclAccess->setSidebarIcon($data->getSidebarIcon());
-        $aclAccess->setSidebarOrder($data->getSidebarOrder());
-        $aclAccess->setStatus($status);
-
-        if(!$aclAccess->save()){
-            throw new \Exception($aclAccess->getMessages());
-        }
-        return $aclAccess;
-    }
 
 }
