@@ -53,10 +53,6 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
         $view->main = $user ;
         $view->status = $status;
 
-//        echo "<pre>";
-//        var_dump($aclChild);
-//        die;
-
         \Phalcon\Tag::setTitle("Manage SubAccount - ".$this->_website->title);
     }
 
@@ -209,13 +205,6 @@ class SubaccountController extends \Backoffice\Controllers\ProtectedController
 
             $aclChild = $generalLibrary->getACL( $user->id );
             $aclChild = $generalLibrary->filterACLsubaccountParentId( $aclChild ) ;
-
-//            echo "asd <pre>";
-//            var_dump($this->_user->id);
-//            var_dump($aclParent);
-//            var_dump($user->id);
-//            var_dump($aclChild);
-//            die;
 
             $view->childuser = $user ;
             $view->aclParent = $aclParent ;

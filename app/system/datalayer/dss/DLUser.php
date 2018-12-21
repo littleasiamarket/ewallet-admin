@@ -1,5 +1,4 @@
 <?php
-
 namespace System\Datalayer;
 
 use System\Library\Security\User as SecurityUser ;
@@ -83,8 +82,7 @@ class DLUser extends \System\Datalayers\Main
     {
         $postData = array(
             'type' => 10 ,
-            'parent' => $user ,
-            'status' => 1
+            'parent' => $user
         );
         $url = '/user/find';
         $result = $this->curlAppsJson( $url , $postData );
@@ -93,8 +91,50 @@ class DLUser extends \System\Datalayers\Main
         return $result;
     }
 
+    public function resetNickname($agentId){
+        $agent = $this->getById($agentId);
+        $url = '/user/'.$agentId.'/update';
+        $postData = array(
+            'nn' => $agent->sn ,
+            'rn' => 1
+        );
+        $result = $this->curlAppsJson( $url , $postData);
+
+        if($result->ec != 0){
+            throw new \Exception("error_reset_nickname");
+        }
+        return true;
+    }
+
+    public function setResetPassword($user, $password)
+    {
+        $url = '/user/'.$user.'/update';
+        $postData = array(
+            'ps' => $password ,
+            'rp' => 1
+        );
+        $result = $this->curlAppsJson( $url , $postData);
+
+        if($result->ec != 0){
+            throw new \Exception("error_reset_password");
+        }
+        return true;
+
+    }
 
     public function getById($user)
+    {
+        $postData = array(
+            'id' => $user
+        );
+        $url = '/user/find';
+        $result = $this->curlAppsJson( $url , $postData);
+        if(isset($result->user) && !empty($result->user) && isset($result->user->{0})){
+            return $result->user->{0};
+        }
+        return false;
+    }
+    public function getByIdStatus($user)
     {
         $postData = array(
             'id' => $user ,
@@ -102,11 +142,9 @@ class DLUser extends \System\Datalayers\Main
         );
         $url = '/user/find';
         $result = $this->curlAppsJson( $url , $postData);
-
         if(isset($result->user) && !empty($result->user) && isset($result->user->{0})){
             return $result->user->{0};
         }
-
         return false;
     }
 
@@ -300,5 +338,23 @@ class DLUser extends \System\Datalayers\Main
     }
     // END DSS
 
+    public function filterResetPassword($data)
+    {
+        if (isset($data["password"])) $data['password'] = \filter_var(\strip_tags(\addslashes($data['password'])), FILTER_SANITIZE_STRING);
+        if (isset($data["confirm_password"])) $data['confirm_password'] = \filter_var(\strip_tags(\addslashes($data['confirm_password'])), FILTER_SANITIZE_STRING);
 
+        return $data;
+    }
+
+    public function validateResetPassword($data){
+
+        if($data['password'] == ""){
+            throw new \Exception('password_empty');
+        }elseif($data['confirm_password'] == ""){
+            throw new \Exception('confirm_password_empty');
+        }elseif($data['confirm_password'] != $data['password']){
+            throw new \Exception('confirm_password_must_same_with_password');
+        }
+        return true;
+    }
 }

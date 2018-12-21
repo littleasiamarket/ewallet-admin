@@ -46,8 +46,8 @@ class IndexController extends \Backoffice\Controllers\BaseController
         if ($this->request->getPost()){
             $data = $this->request->getPost();
 
-            if($this->session->has('user')){
-
+            if($this->session->has('user') && $this->session->has('real_user') ){
+                return $this->response->redirect("/");
             } else {
                 $username = strtoupper($data['username']);
                 $password = $data['password'];
