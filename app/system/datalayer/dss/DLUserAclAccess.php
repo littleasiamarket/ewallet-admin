@@ -75,6 +75,7 @@ class DLUserAclAccess extends \System\Datalayers\Main{
             $postData['orders'][] = $this->curlOrders("asc" , "sidebar_order" );
         } else {
             $postData['conditions'][] = $this->curlConditions("=" , "user_id" , $id );
+            $postData['conditions'][] = $this->curlConditions("!=" , "module" , "subaccount" );
             $postData['conditions'][] = $this->curlConditions("=" , "status" , 1 );
             $postData['orders'][] = $this->curlOrders("asc" , "sidebar_order" );
         }

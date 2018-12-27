@@ -45,7 +45,7 @@
                                     <div class="row">
                                         <div class="col-xs-6">
                                             <b>{{translate['nickname']|upper}}</b>
-                                            <input type="text" class="form-control uppercase margin-top-5" disabled value="{{real_user.nickname}}" >
+                                            <input type="text" class="form-control uppercase margin-top-5" disabled value="{{real_user.nn}}" >
                                         </div>
                                         <div class="col-xs-6">
                                             <b>{{translate['last_login']|upper}}</b>
@@ -55,7 +55,7 @@
                                     <div class="row  margin-top-20">
                                         <div class="col-xs-6">
                                             <b>{{translate['username']|upper}}</b>
-                                            <input type="text" class="form-control uppercase margin-top-5" disabled value="{{real_user.username}}" >
+                                            <input type="text" class="form-control uppercase margin-top-5" disabled value="{{real_user.sn}}" >
                                         </div>
                                         <div class="col-xs-6">
                                             <b>{{translate['login_ip']|upper}}</b>

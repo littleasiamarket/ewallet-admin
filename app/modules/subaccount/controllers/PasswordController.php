@@ -36,7 +36,7 @@ class PasswordController extends \Backoffice\Controllers\ProtectedController
                 $password = base64_encode($password);
 
                 $DLUser->validateResetPassword($filterData);
-                $DLUser->setResetPassword($Child->id,$password);
+                $DLUser->setResetPassword($Child->id , $password);
 
                 $this->flash->success("reset_password_successful");
                 $this->response->redirect($this->_module."/subaccount/detail/".$childId)->send();

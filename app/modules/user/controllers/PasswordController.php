@@ -15,10 +15,11 @@ class PasswordController extends \Backoffice\Controllers\ProtectedController
 
             $securityLibrary = new SecurityUser();
             $password = $securityLibrary->enc_str($data['password']);
+            $password = base64_encode($password);
 
             $validation = new Validation();
             $validation->addCondition("password", $data['password'], "format", "password");
-            $validation->addCondition("confirm_password_old", $this->_user->getPassword(), "value", "equal", $password);
+            $validation->addCondition("confirm_password_old", $this->_user->ps , "value", "equal", $password);
             $validation->addCondition("password_new", $data['password1'], "format", "password");
             $validation->addCondition("confirm_password_new", $data['password2'], "format", "password");
             $validation->addCondition("confirm_password_new", $data['password2'], "value", "equal", $data['password1']);
@@ -30,15 +31,17 @@ class PasswordController extends \Backoffice\Controllers\ProtectedController
                     }
                 }
             } else {
-                if($this->_user->getStatus() >= 0) {
-
+                if($this->_user->ust >= 0) {
                     $password = $securityLibrary->enc_str($data['password1']);
+                    $password = base64_encode($password);
+
                     $DLuser = new DLUser();
                     // TODO :: change password manual
-                    $savePassword = $DLuser->setUserPassword($this->_realUser , $password);
-                    if($savePassword){
-                        $this->_user->setPassword($password);
-
+                    $savePassword = $DLuser->setUserPassword($this->_realUser->id , $password);
+                    if($savePassword->ec == 0){
+                        $this->_user->rp = 0 ;
+                        $this->session->set('real_user', $this->_user);
+                        
                         $this->successFlash($this->_translate['password_changed']);
                         return $this->response->redirect("/");
                     } else {
@@ -76,14 +79,17 @@ class PasswordController extends \Backoffice\Controllers\ProtectedController
             } else {
                 $DLuser = new DLUser();
                 $user = $DLuser->getByUsername($data['username']);
-                if($this->_user->getStatus() > 0 && $user->getStatus() > 0 && $user->getParent() == $this->_user->getId() ) {
+                if($this->_user->ust > 0 && $user->ust > 0 && $user->idp == $this->_user->id ) {
 
                     $securityLibrary = new SecurityUser();
                     $password = $securityLibrary->enc_str($data['password']);
+                    $password = base64_encode($password);
 
                     // TODO :: change password manual
                     $savePassword = $DLuser->setResetPassword($user , $password);
-                    if($savePassword){
+                    if($savePassword->ec == 0){
+//                        $this->_user->rp = 0 ;
+//                        $this->session->set('real_user', $this->_user);
 
                         $this->successFlash($this->_translate['password_changed']);
                         return $this->response->redirect("/");

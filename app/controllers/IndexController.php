@@ -19,13 +19,17 @@ class IndexController extends \Backoffice\Controllers\BaseController
 
             return $this->response->redirect("/login");
         } else {
-//            $acl = $this->session->get('sidebar');
-//            echo "<pre>";
-//            var_dump($acl);
-//            die;
 
-//            $this->view->menu = "home";
-
+            echo "<pre>";
+            var_dump( empty($this->_user) );
+            var_dump( empty($this->response) );
+            var_dump( $this->session->has('user'));
+            var_dump( $this->session->has('real_user'));
+            var_dump( $this->session->has('user_session'));
+            var_dump( $this->session->get('user'));
+            var_dump( $this->session->get('real_user'));
+            var_dump( $this->session->get('user_session'));
+            die;
 
 //            $DL = new DLUserCurrency();
 //            $currency = $DL->getAll($this->_user->getId());
@@ -41,12 +45,13 @@ class IndexController extends \Backoffice\Controllers\BaseController
 
     public function loginAction(){
         $view = $this->view;
+
         if($this->_user) return $this->response->redirect("/");
 
         if ($this->request->getPost()){
             $data = $this->request->getPost();
 
-            if($this->session->has('user') && $this->session->has('real_user') ){
+            if($this->session->has('user') && $this->session->has('real_user') && $this->session->has('user_session') ){
                 return $this->response->redirect("/");
             } else {
                 $username = strtoupper($data['username']);
@@ -87,15 +92,16 @@ class IndexController extends \Backoffice\Controllers\BaseController
 //                    var_dump($user);
 //                    die;
 
+                        $DLUserAclAccess = new DLUserAclAccess();
+                        $generalLibrary = new General();
+                        $DLuser = new DLUser() ;
                         // if Type == 10, subaccount, $user fill with parent, session sidebar and acl filled with its own acl
                         if($user->tp == 10) {
                             //TODO :: save and check to redis
                             //TODO :: incomplete
                             //set session add acl for the current user
-                            $DLUserAclAccess = new DLUserAclAccess();
                             $aclObject = $DLUserAclAccess->getById($user->id);
 
-                            $generalLibrary = new General();
                             $acl = $generalLibrary->filterACLlist($aclObject);
                             $sideBar = $generalLibrary->getSidebar($aclObject);
 
@@ -105,7 +111,6 @@ class IndexController extends \Backoffice\Controllers\BaseController
                             $this->session->set('sidebar', $sideBar);
 
                             $this->session->set('real_user', $user);
-                            $DLuser = new DLUser() ;
                             $user = $DLuser->getById($user->idp);
                             $this->session->set('user', $user);
                         } else {
@@ -115,10 +120,8 @@ class IndexController extends \Backoffice\Controllers\BaseController
                             //TODO :: save and check to redis
                             //TODO :: incomplete
                             //set session add acl for the current user
-                            $DLUserAclAccess = new DLUserAclAccess();
                             $aclObject = $DLUserAclAccess->getById($user->id);
 
-                            $generalLibrary = new General();
                             $acl = $generalLibrary->filterACLlist($aclObject);
                             $sideBar = $generalLibrary->getSidebar($aclObject);
 
@@ -128,6 +131,15 @@ class IndexController extends \Backoffice\Controllers\BaseController
                             $this->session->set('sidebar', $sideBar);
                             //TODO :: save and check to redis
                         }
+                        echo "<pre>";
+                        var_dump($this->_realUser);
+                        var_dump($this->_realUser->id);
+                        $userSession = $generalLibrary->insertSession($this->_realUser->id , date("Y-m-d H:i:s"  ) , $generalLibrary->generateSession() );
+                        $this->session->set('user_session', $userSession);
+                        var_dump($userSession);
+                        var_dump("end");
+                        die;
+
 
 
                         $this->successFlash($view->translate['login_success']);

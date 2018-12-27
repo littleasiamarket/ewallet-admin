@@ -6,7 +6,8 @@ defined('APP_PATH') || define('APP_PATH', realpath('.'));
 use System\Language\Language;
 use Phalcon\Mvc\Controller;
 use Phalcon\Translate\Adapter\NativeArray;
-use System\Library\Security\General ;
+use System\Library\User\General ;
+use System\Datalayer\DLUserSession ;
 
 class BaseController extends Controller
 {
@@ -36,6 +37,8 @@ class BaseController extends Controller
         $this->_setUser();
         $this->_setLanguage();
         $this->_setNavigation();
+
+
         $this->_checkResetPassword();
 
 
@@ -76,10 +79,6 @@ class BaseController extends Controller
 
 //        $this->view->frontend = $this->_frontend;
 
-        $security = new General();
-        $this->view->time = date("d-m-Y H:i:s"  ) ;
-
-        $this->view->login_ip = $security->getIP() ;
         $this->view->module = $this->_module = $this->router->getModuleName();
         $this->view->controller = $this->_controller  = $this->router->getControllerName();
         $this->view->action = $this->_action = $this->router->getActionName();
@@ -142,7 +141,23 @@ class BaseController extends Controller
         if($this->session->has('currency')) {
             $currency = $this->session->get('currency');
         }
+        if($this->session->has('user_session')){
+            var_dump(2);
+            $user_session = $this->session->get('user_session');
+            $DLUserSession = new DLUserSession ();
+            $checkSession = $DLUserSession->checkUserSession( $this->_realUser->id , $user_session['user_session']);
+            var_dump(123 ."sini2");
+            if(!$checkSession){
+                var_dump(123 ."sini2");
+                $this->errorFlash('user_login_somewhere_else');
 
+                return $this->response->redirect("/logout");
+            } else {
+                $General = new General();
+                $General->insertSession( $this->_realUser->id , $user_session['user_last_login_date'] , $user_session['user_session']);
+            }
+            $this->view->user_session = $user_session ;
+        }
         $this->view->user = $this->_user ;
         $this->view->real_user = $this->_realUser ;
     }
@@ -157,26 +172,26 @@ class BaseController extends Controller
 
     }
 
-    protected function _checkACL()
-    {
-        //check ACL when there is user
-        if($this->session->has('user')){
-            if($this->session->has('acl') && $this->_module != null && $this->_module != 'ajax' ){
-                $acl = $this->session->get('acl') ;
-                if( $acl[$this->_module][$this->_controller][$this->_action] == 0){
-                    $this->errorFlash('cannot_access');
-                    $this->_allowed = 0 ;
-
-                    return $this->response->redirect("/");
-                }
-
-            }
-        }
-
-    }
+//    protected function _checkACL()
+//    {
+//        //check ACL when there is user
+//        if($this->session->has('user')){
+//            if($this->session->has('acl') && $this->_module != null && $this->_module != 'ajax' ){
+//                $acl = $this->session->get('acl') ;
+//                if( $acl[$this->_module][$this->_controller][$this->_action] == 0){
+//                    $this->errorFlash('cannot_access');
+//                    $this->_allowed = 0 ;
+//
+//                    return $this->response->redirect("/");
+//                }
+//
+//            }
+//        }
+//
+//    }
 
     protected function _checkResetPassword(){
-        if( $this->_realUser ){
+        if( isset($this->_realUser) ){
             if ($this->_realUser->rp == 1){
                 if (!($this->_module == 'user' && $this->_controller == 'password' && $this->_action == 'change')){
                     $this->errorFlash('please_change_password');

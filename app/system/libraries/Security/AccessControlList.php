@@ -37,6 +37,7 @@ class AccessControlList extends Plugin
             if($this->session->has('acl') && $module != null && $module != 'ajax' ){
                 $acl = $this->session->get('acl') ;
                 if( !isset($acl[$module][$controller]) || !isset($acl[$module][$controller][$action]) || $acl[$module][$controller][$action] == 0){
+
                     return $this->response->redirect($_SERVER['HTTP_REFERER'])->send();
                 }
 

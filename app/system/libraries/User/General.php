@@ -3,7 +3,9 @@ namespace System\Library\User;
 
 use \System\Datalayer\DLUserAclResource ;
 use \System\Datalayer\DLUserAclAccess ;
-use System\Datalayer\DLUserWhitelistIp;
+use System\Datalayer\DLUserWhitelistIp ;
+use System\Datalayer\DLUserSession ;
+use System\Library\Security\General as SecurityGeneral ;
 
 class General
 {
@@ -37,8 +39,8 @@ class General
     public function setSubaccountDefault($acl , $id){
         foreach ($acl as $aclrow){
             $status = 0;
-            if($aclrow->module == 'user' ) $status = 1;
-            if($aclrow->module != 'subaccount'){
+            if($aclrow->mod == 'user' ) $status = 1;
+            if($aclrow->mod != 'subaccount'){
                 $acl = new DLUserAclAccess();
                 $acl->setAclAccessWithStatus($id , $aclrow , $status);
             }
@@ -374,6 +376,20 @@ class General
         $session = base64_encode(mt_rand().time().$string.mt_rand().time() ) ;
 
         return $session ;
+    }
+
+    public function insertSession($id , $last_login_date, $session){
+        $security = new SecurityGeneral();
+        $DLUserSession = new DLUserSession();
+
+        $data['user_session'] = $session ;
+        $data['user_last_action'] = date("Y-m-d H:i:s"  ) ;
+        $data['user_last_ip'] = $security->getIP() ;
+        $data['user_last_login_date'] = $last_login_date ;
+        $post = $DLUserSession->insertUserSession($id , $data['user_session'] ,  $data['user_last_action'] , $data['user_last_ip'] , $data['user_last_login_date'] ) ;
+        var_dump($data);
+        if($post) return $data;
+        return false ;
     }
 
 
